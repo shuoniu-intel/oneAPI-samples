@@ -28,7 +28,7 @@ endif()
 set(EMULATOR_COMPILE_FLAGS "${WIN_FLAG} -fintelfpga -DFPGA_EMULATOR")
 set(EMULATOR_LINK_FLAGS "-fintelfpga")
 set(HARDWARE_COMPILE_FLAGS "${WIN_FLAG} -fintelfpga")
-set(HARDWARE_LINK_FLAGS "-fintelfpga -Xshardware -Xsboard=${FPGA_BOARD} ${USER_HARDWARE_FLAGS}")
+set(HARDWARE_LINK_FLAGS "-fintelfpga -Xshardware -Xsboard=${FPGA_BOARD} -Xsdsp-mode=prefer-softlogic ${USER_HARDWARE_FLAGS}")
 # use cmake -D USER_HARDWARE_FLAGS=<flags> to set extra flags for FPGA backend compilation
 
 ###############################################################################

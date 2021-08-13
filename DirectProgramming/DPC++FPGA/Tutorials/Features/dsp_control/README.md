@@ -46,8 +46,8 @@ The first template argument `Preference` is an enum with three valid values:
 The second template argument `Propagate` is a boolean that determines the propagation of the first argument `Preference` to function calls in the lambda expression:
 | Option  | Explanation
 ---       |---
-| `True`  | This is the default. `Preference` is propagated to function calls in the lambda expression.
-| `False` | `Preference` is not propagated to function calls in the lambda expression. So `Preference` only applies to math functions directly called in the lambda expression. 
+| `On`    | This is the default. `Preference` is propagated to function calls in the lambda expression.
+| `Off`   | `Preference` is not propagated to function calls in the lambda expression. So `Preference` only applies to math functions directly called in the lambda expression.
 
 **NOTE:**
 1. `Preference` never applies to nested `math_dsp_control<>()` calls. Each nested `math_dsp_control<>()` call is determined by its own `Preference`.
