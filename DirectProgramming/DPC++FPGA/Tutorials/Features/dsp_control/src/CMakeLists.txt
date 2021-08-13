@@ -48,7 +48,7 @@ add_custom_target(fpga_emu DEPENDS ${EMULATOR_TARGET})
 ### Generate Report
 ###############################################################################
 # To compile manually:
-#   dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> -fsycl-link=early dsp_control.cpp -o dsp_control_report.a
+#   dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> -fsycl-link=early -Xsdsp-mode=prefer-softlogic dsp_control.cpp -o dsp_control_report.a
 set(FPGA_EARLY_IMAGE ${TARGET_NAME}_report.a)
 # The compile output is not an executable, but an intermediate compilation result unique to DPC++.
 add_executable(${FPGA_EARLY_IMAGE} ${SOURCE_FILE})
@@ -61,10 +61,10 @@ set_target_properties(${FPGA_EARLY_IMAGE} PROPERTIES LINK_FLAGS "${HARDWARE_LINK
 ### FPGA Hardware
 ###############################################################################
 # To compile in a single command:
-#   dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> dsp_control.cpp -o dsp_control.fpga
+#   dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> -Xsdsp-mode=prefer-softlogic dsp_control.cpp -o dsp_control.fpga
 # CMake executes:
 #   [compile] dpcpp -fintelfpga -o dsp_control.cpp.o -c dsp_control.cpp
-#   [link]    dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> dsp_control.cpp.o -o dsp_control.fpga
+#   [link]    dpcpp -fintelfpga -Xshardware -Xsboard=<FPGA_BOARD> -Xsdsp-mode=prefer-softlogic dsp_control.cpp.o -o dsp_control.fpga
 add_executable(${FPGA_TARGET} EXCLUDE_FROM_ALL ${SOURCE_FILE})
 add_custom_target(fpga DEPENDS ${FPGA_TARGET})
 set_target_properties(${FPGA_TARGET} PROPERTIES COMPILE_FLAGS "${HARDWARE_COMPILE_FLAGS}")
