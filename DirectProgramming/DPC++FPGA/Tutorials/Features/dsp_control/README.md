@@ -53,7 +53,7 @@ The second template argument `Propagate` is a boolean that determines propagatio
 
 **NOTE:**
 1. `Preference` never applies to nested `math_dsp_control<>()` calls. Each nested `math_dsp_control<>()` has its own `Preference`.
-2. Local control overrides global control if they have a conflict on a math operation.
+2. Local control overrides global control on a controlled math operation.
 
 ## Key Concepts
 * How to apply global DSP control in command-line interface
