@@ -1,5 +1,5 @@
 # DSP Control
-This FPGA tutorial demonstrates how to set implementation preference for math functions, which affects hardware resource utilization on FPGA device.
+This FPGA tutorial demonstrates how to set implementation preference for math operations, which affects hardware resource utilization on FPGA device.
 
 ***Documentation***:  The [DPC++ FPGA Code Samples Guide](https://software.intel.com/content/www/us/en/develop/articles/explore-dpcpp-through-intel-fpga-code-samples.html) helps you to navigate the samples and build your knowledge of DPC++ for FPGA. <br>
 The [oneAPI DPC++ FPGA Optimization Guide](https://software.intel.com/content/www/us/en/develop/documentation/oneapi-fpga-optimization-guide) is the reference manual for targeting FPGAs through DPC++. <br>
@@ -10,53 +10,55 @@ The [oneAPI Programming Guide](https://software.intel.com/en-us/oneapi-programmi
 | OS                                | Linux* Ubuntu* 18.04/20.04, RHEL*/CentOS* 8, SUSE* 15; Windows* 10
 | Hardware                          | Intel® Programmable Acceleration Card (PAC) with Intel Arria® 10 GX FPGA <br> Intel® FPGA Programmable Acceleration Card (PAC) D5005 (with Intel Stratix® 10 SX) <br> Intel® FPGA 3rd party / custom platforms with oneAPI support <br> *__Note__: Intel® FPGA PAC hardware is only compatible with Ubuntu 18.04* 
 | Software                          | Intel® oneAPI DPC++ Compiler <br> Intel® FPGA Add-On for oneAPI Base Toolkit 
-| What you will learn               |  How to apply global DSP control in command-line interface. <br> How to apply local DSP control in source code. <br> Scope of datatypes and math functions that support DSP control.
+| What you will learn               |  How to apply global DSP control in command-line interface. <br> How to apply local DSP control in source code. <br> Scope of datatypes and math operations that support DSP control.
 | Time to complete                  | 15 minutes
 
 ## Purpose
-This tutorial shows how to apply global and local DSP controls to set implementation preference for math functions to control usage of DSPs. The global control is applied via command-line option and affects math functions in all kernels. The local control is applied via library function and affects math functions in a block scope in one single kernel. Both global and local controls only affect math functions that support DSP control.
+This tutorial shows how to apply global and local DSP controls to set implementation preference for math operations to control usage of DSPs. The global control is applied via command-line option and affects math operations in all kernels. The local control is applied via library function and affects math operations in a block scope in one single kernel. Both global and local controls only affect math operations that support DSP control.
 
-### Scope of Datatypes and Math Functions
-| Datatypes              | Math functions
+### Scope of Datatypes and math operations
+| Datatypes              | math operations
 ---                      |---
-| `float`                | Add, sub, constant mul (variable * constant)
-| `hls_float<8, 23>`     | Add, sub, constant mul (variable * constant)
-| `int`                  | Constant mul (variable * constant)
-| `ac_int`               | Constant mul (variable * constant)
-| `ac_fixed`             | Constant mul (variable * constant)
+| `float`                | Add, sub, constant mul
+| `hls_float<8, 23>`     | Add, sub, constant mul
+| `int`                  | Constant mul
+| `ac_int`               | Constant mul
+| `ac_fixed`             | Constant mul
+
+**NOTE:** _constant mul_ means one operand of the multiplication is a constant.
 
 ### Global Control
-The `-Xsdsp-mode` command-line option sets implementation preference of all kernel math functions that support DSP control. It has three valid values:
+The `-Xsdsp-mode` command-line option sets implementation preference of math operations that support DSP control in all kernels. It has three valid options:
 | Option                           | Explanation
 ---                                |---
-| `-Xsdsp-mode=default`            | This is the default. The compiler determines the implementation based on datatype and math function.
-| `-Xsdsp-mode=prefer-dsp`         | Prefer math functions to be implemented in **DSPs**. If a math function is implemented by DSPs by default, you will see no difference in resource utilization or area. Otherwise, you will notice decrease in the usage of soft-logic resources and increase in the usage of DSPs.
-| `-Xsdsp-mode=prefer-softlogic`   | Prefer math functions to be implemented in **soft-logic**. If a math function is implemented without DSPs by default, you will see no difference in resource utilization or area. Otherwise, you will notice decrease in the usage of DSPs and increase in the suage of soft-logic resources.
+| `-Xsdsp-mode=default`            | This is the default. The compiler determines the implementation based on datatype and math operation.
+| `-Xsdsp-mode=prefer-dsp`         | Prefer math operations to be implemented in **DSPs**. If a math operation is implemented by DSPs by default, you will see no difference in resource utilization or area. Otherwise, you will notice decrease in the usage of soft-logic resources and increase in the usage of DSPs.
+| `-Xsdsp-mode=prefer-softlogic`   | Prefer math operations to be implemented in **soft-logic**. If a math operation is implemented without DSPs by default, you will see no difference in resource utilization or area. Otherwise, you will notice decrease in the usage of DSPs and increase in the suage of soft-logic resources.
 
 ### Local Control
-The library function `math_dsp_control<Preference::<enum>, Propagate::<bool>>([&]{})` provides block scope local control. A reference-capturing lambda expression is passed as the argument to this library function. Inside the lambda expression, implementation preference of math functions that support DSP control will be determined by two template arguments.
+The library function `math_dsp_control<Preference::<enum>, Propagate::<bool>>([&]{})` provides block scope local control in one single kernel. A reference-capturing lambda expression is passed as the argument to this library function. Inside the lambda expression, implementation preference of math operations that support DSP control will be determined by two template arguments.
 
-The first template argument `Preference` is an enum with three valid values:
+The first template argument `Preference` is an enum with three valid options:
 | Option                           | Explanation
 ---                                |---
-| `Preference::DSP`                | This is the default. Prefer math functions to be implemented in **DSPs**. Its behavior on a math function is equivalent to global control `-Xsdsp-mode=prefer-dsp`.
-| `Preference::Softlogic`          | Prefer math functions to be implemented in **soft-logic**. Its behavior on a math function is equivalent to global control `-Xsdsp-mode=prefer-softlogic`.
-| `Preference::Compiler_default`   | Compiler determines the implementation based on datatype and math function. Its behavir on a math function is equivalent to global control `-Xsdsp-mode=default`.
+| `Preference::DSP`                | This is the default. Prefer math operations to be implemented in **DSPs**. Its behavior on a math operation is equivalent to global control `-Xsdsp-mode=prefer-dsp`.
+| `Preference::Softlogic`          | Prefer math operations to be implemented in **soft-logic**. Its behavior on a math operation is equivalent to global control `-Xsdsp-mode=prefer-softlogic`.
+| `Preference::Compiler_default`   | Compiler determines the implementation based on datatype and math operation. Its behavir on a math operation is equivalent to global control `-Xsdsp-mode=default`.
 
-The second template argument `Propagate` is a boolean that determines the propagation of the first argument `Preference` to function calls in the lambda expression:
+The second template argument `Propagate` is a boolean that determines propagation of the first argument `Preference` to functions called in the lambda expression:
 | Option  | Explanation
 ---       |---
-| `On`    | This is the default. `Preference` is propagated to function calls in the lambda expression.
-| `Off`   | `Preference` is not propagated to function calls in the lambda expression. So `Preference` only applies to math functions directly called in the lambda expression.
+| `On`    | This is the default. `Preference` is propagated to all functions called in the lambda expression, and affects all math operations on the call graph in the lambda expression until a nested `math_dsp_control<>()` call stops the propatation.
+| `Off`   | `Preference` is not propagated to functions called in the lambda expression. So `Preference` only applies to math operations directly used in the lambda expression.
 
 **NOTE:**
-1. `Preference` never applies to nested `math_dsp_control<>()` calls. Each nested `math_dsp_control<>()` call is determined by its own `Preference`.
-2. Local control overrides global control if they have a conflict on a math function.
+1. `Preference` never applies to nested `math_dsp_control<>()` calls. Each nested `math_dsp_control<>()` has its own `Preference`.
+2. Local control overrides global control if they have a conflict on a math operation.
 
 ## Key Concepts
 * How to apply global DSP control in command-line interface
 * How to apply local DSP control in source code
-* Scope of datatypes and math functions that support DSP control
+* Scope of datatypes and math operations that support DSP control
 
 ## License  
 Code samples are licensed under the MIT license. See
@@ -154,10 +156,10 @@ When compiling for FPGA hardware, it is recommended to increase the job timeout 
 You can compile and run this tutorial in the Eclipse* IDE (in Linux*) and the Visual Studio* IDE (in Windows*). For instructions, refer to the following link: [Intel® oneAPI DPC++ FPGA Workflows on Third-Party IDEs](https://software.intel.com/en-us/articles/intel-oneapi-dpcpp-fpga-workflow-on-ide)
 
 ## Examining the Reports
-Locate `report.html` in the `dsp_control_report.prj/reports/` or `dsp_control_s10_pac_report.prj/reports/` directory. Open the report in any of Chrome*, Firefox*, Edge*, or Internet Explorer*.
+Locate `report.html` in the `dsp_control_report.prj/reports/` directory. Open the report in any of Chrome*, Firefox*, Edge*, or Internet Explorer*.
 
 1. Navigate to Area Analysis of System (Area Analysis > Area Analysis of System). In this view, you can see usage of FPGA resources which reflects the outcome of DSP control.
-2. Navigate to System Viewer (Views > System Viewer). In this view, you can verify the `Implementation Preference` on the Details Panel of the graph node of a controlled math function.
+2. Navigate to System Viewer (Views > System Viewer). In this view, you can verify the `Implementation Preference` on the Details Panel of the graph node of a controlled math instruction.
 
 ## Running the Sample
 
@@ -179,5 +181,5 @@ PASSED: all kernel results are correct.
 ### Discussion
 
 Feel free to experiment further with the tutorial code. You can:
- - Try various control options in global scope and local scope. 
- - Try various datatypes and math functions that support DSP control.
+ - Try various control options with global control and local control.
+ - Try various datatypes and math operations that support DSP control.
