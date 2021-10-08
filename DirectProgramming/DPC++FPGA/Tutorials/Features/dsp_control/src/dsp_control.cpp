@@ -35,26 +35,26 @@ void KernelRun(const std::vector<float> &input_data,
     buffer input_buffer(input_data);
     buffer output_buffer(output_data);
 
-    auto e_g = q.submit([&](handler &h) {
+    q.submit([&](handler &h) {
       accessor input_a(input_buffer, h, read_only);
       accessor output_a(output_buffer, h, write_only, no_init);
 
       // Kernel that demonstrates DSP global control
       h.single_task<GlobalControl>([=]() [[intel::kernel_args_restrict]] {
-        // Command-line option `-Xsdsp-mode=prefer-softlogic` controls the float
-        // add to be implemented in soft-logic
+        // Command-line option `-Xsdsp-mode=prefer-softlogic` controls the
+        // floating-point addition to be implemented in soft-logic
         output_a[0] = input_a[0] + input_a[1];
       });
     });
 
-    auto e_l = q.submit([&](handler &h) {
+    q.submit([&](handler &h) {
       accessor input_a(input_buffer, h, read_only);
       accessor output_a(output_buffer, h, write_only, no_init);
 
       // Kernel that demonstrates DSP local control
       h.single_task<LocalControl>([=]() [[intel::kernel_args_restrict]] {
         // The local control library function overrides the global control, and
-        // makes the float add to be implemented in DSP
+        // makes the floating-point addition to be implemented in DSP
         ext::intel::math_dsp_control<ext::intel::Preference::DSP,
                                      ext::intel::Propagate::Off>(
             [&] { output_a[1] = input_a[0] + input_a[1]; });
@@ -66,7 +66,7 @@ void KernelRun(const std::vector<float> &input_data,
     std::cerr << "Caught a SYCL host exception:\n" << e.what() << "\n";
 
     // Most likely the runtime couldn't find FPGA hardware!
-    if (e.get_cl_code() == CL_DEVICE_NOT_FOUND) {
+    if (e.code().value() == CL_DEVICE_NOT_FOUND) {
       std::cerr << "If you are targeting an FPGA, please ensure that your "
                    "system has a correctly configured FPGA board.\n";
       std::cerr << "Run sys_check in the oneAPI root directory to verify.\n";
@@ -79,19 +79,25 @@ void KernelRun(const std::vector<float> &input_data,
 
 int main() {
   std::vector<float> input_data = {1.234f, 2.345f};
-  std::vector<float> output_data = {.0f, .0f};
-  float golden = input_data[0] + input_data[1];
+  std::vector<float> output_data(2);
 
   KernelRun(input_data, output_data);
 
   bool passed = true;
-  for (size_t i = 0; i < output_data.size(); i++) {
-    if (output_data[i] != golden) {
-      std::cout << "Output Mismatch: \n"
-                << "output_data[" << i << "] vs golden" << i << " = "
-                << output_data[i] << "," << golden << " \n";
-      passed = false;
-    }
+  float golden = input_data[0] + input_data[1];
+
+  if (output_data[0] != golden) {
+    std::cout << "Kernel GlobalControl Output Mismatch: \n"
+              << "output = " << output_data[0] << ", golden = " << golden
+              << "\n";
+    passed = false;
+  }
+
+  if (output_data[1] != golden) {
+    std::cout << "Kernel LocalControl Output Mismatch: \n"
+              << "output = " << output_data[1] << ", golden = " << golden
+              << "\n";
+    passed = false;
   }
 
   if (passed) {

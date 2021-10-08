@@ -1,5 +1,5 @@
 # DSP Control
-This FPGA tutorial demonstrates how to set implementation preference of math functions, which affects hardware resource utilization on FPGA device.
+This FPGA tutorial demonstrates how to set implementation preference for math functions, which affects hardware resource utilization on FPGA device.
 
 ***Documentation***:  The [DPC++ FPGA Code Samples Guide](https://software.intel.com/content/www/us/en/develop/articles/explore-dpcpp-through-intel-fpga-code-samples.html) helps you to navigate the samples and build your knowledge of DPC++ for FPGA. <br>
 The [oneAPI DPC++ FPGA Optimization Guide](https://software.intel.com/content/www/us/en/develop/documentation/oneapi-fpga-optimization-guide) is the reference manual for targeting FPGAs through DPC++. <br>
@@ -10,11 +10,11 @@ The [oneAPI Programming Guide](https://software.intel.com/en-us/oneapi-programmi
 | OS                                | Linux* Ubuntu* 18.04/20.04, RHEL*/CentOS* 8, SUSE* 15; Windows* 10
 | Hardware                          | Intel® Programmable Acceleration Card (PAC) with Intel Arria® 10 GX FPGA <br> Intel® FPGA Programmable Acceleration Card (PAC) D5005 (with Intel Stratix® 10 SX) <br> Intel® FPGA 3rd party / custom platforms with oneAPI support <br> *__Note__: Intel® FPGA PAC hardware is only compatible with Ubuntu 18.04* 
 | Software                          | Intel® oneAPI DPC++ Compiler <br> Intel® FPGA Add-On for oneAPI Base Toolkit 
-| What you will learn               |  How to apply global DSP control in command-line interface <br> How to apply local DSP control in source code <br> Scope of datatypes and math functions that support DSP control
+| What you will learn               |  How to apply global DSP control in command-line interface. <br> How to apply local DSP control in source code. <br> Scope of datatypes and math functions that support DSP control.
 | Time to complete                  | 15 minutes
 
 ## Purpose
-This tutorial shows how to apply global and local controls to set implementation preference of math functions to control usage of DSPs. The global control is applied via command-line option and affects all kernel math functions that support DSP control. The local control is applied via library function and affects math functions in a block scope.
+This tutorial shows how to apply global and local DSP controls to set implementation preference for math functions to control usage of DSPs. The global control is applied via command-line option and affects math functions in all kernels. The local control is applied via library function and affects math functions in a block scope in one single kernel. Both global and local controls only affect math functions that support DSP control.
 
 ### Scope of Datatypes and Math Functions
 | Datatypes              | Math functions
