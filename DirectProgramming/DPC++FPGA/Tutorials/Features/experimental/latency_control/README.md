@@ -1,9 +1,10 @@
 # Latency Control
 This FPGA tutorial demonstrates how to set latency constraints to pipes and LSUs accesses.
 
-***Documentation***:  The [DPC++ FPGA Code Samples Guide](https://software.intel.com/content/www/us/en/develop/articles/explore-dpcpp-through-intel-fpga-code-samples.html) helps you to navigate the samples and build your knowledge of DPC++ for FPGA. <br>
-The [oneAPI DPC++ FPGA Optimization Guide](https://software.intel.com/content/www/us/en/develop/documentation/oneapi-fpga-optimization-guide) is the reference manual for targeting FPGAs through DPC++. <br>
-The [oneAPI Programming Guide](https://software.intel.com/en-us/oneapi-programming-guide) is a general resource for target-independent DPC++ programming.
+#### Additional Documentation:
+ - [*DPC++ FPGA Code Samples Guide*](https://software.intel.com/content/www/us/en/develop/articles/explore-dpcpp-through-intel-fpga-code-samples.html) helps you to navigate the samples and build your knowledge of DPC++ for FPGA. <br>
+- [*oneAPI DPC++ FPGA Optimization Guide*](https://software.intel.com/content/www/us/en/develop/documentation/oneapi-fpga-optimization-guide) is the reference manual for targeting FPGAs through DPC++. <br>
+- [*oneAPI Programming Guide*](https://software.intel.com/en-us/oneapi-programming-guide) is a general resource for target-independent DPC++ programming.
 
 | Optimized for                     | Description
 ---                                 |---
@@ -17,20 +18,26 @@ The [oneAPI Programming Guide](https://software.intel.com/en-us/oneapi-programmi
 This FPGA tutorial demonstrates how to set latency constraints to pipes and LSUs accesses and how to confirm that the compiler respected the latency control directive.
 
 ### Use Model
-**Note**: The APIs described in this section are experimental. Future versions of latency controls may change these APIs in ways that are incompatible with the version described here.
+**Note**: The APIs described in this section are experimental. Future versions of latency controls might change these APIs in ways that are incompatible with the version described here.
 
-Latency controls APIs are provided on member functions `read()` and `write()` of class `ext::intel::experimental::pipe` and on member functions `load()` and `store()` of class `ext::intel::experimental::lsu`. Other than the latency controls support, the experimental `pipe` and `lsu` are identical to `ext::intel::pipe` and `ext::intel::lsu`. The experimental `pipe` and `lsu` are also provided by <sycl/ext/intel/fpga_extensions.hpp>.
+Latency controls APIs are provided on member functions `read()` and `write()` of class `ext::intel::experimental::pipe` and on member functions `load()` and `store()` of class `ext::intel::experimental::lsu`. Other than the latency controls support, the experimental `pipe` and `lsu` are identical to `ext::intel::pipe` and `ext::intel::lsu`. The experimental `pipe` and `lsu` are also provided by `<sycl/ext/intel/fpga_extensions.hpp>`.
 
-Those member functions listed above can take in a property list instance (`ext::oneapi::experimental::properties`) as a function argument, which can contain latency controls properties `latency_anchor_id` and `latency_constraint`.
+These `read()`, `write()`, `load()`, and `store()` member functions can take a property list instance (`ext::oneapi::experimental::properties`) as a function argument, which can contain the following latency controls properties: 
 
-* `ext::intel::experimental::latency_anchor_id<N>`, where `N` is a signed integer: A label that can be associated with the pipes and LSUs functions listed above. This label can then be referenced by the `latency_constraint` properties to define relative latency constraints. Functions with this property will be referred to as "labeled functions".
-* `ext::intel::experimental::latency_constraint<A, B, C>`: A constraint than can be associated with the pipes and LSUs functions listed above. It provides a latency constraint between this function and a different labeled function. Functions which have this property will be referred to as "constrained functions".
-  * `A` is a signed integer: The label of the labeled function which is constrained relative to the constrained function.
-  * `B` is an enum value: The type of constraint, can be `latency_control_type::exact` (exact latency), `latency_control_type::max` (maximum latency), and `latency_control_type::min` (minimum latency).
-  * `C` is a signed integer: The relative clock cycle difference between the labeled function and the constrained function, that the constraint should infer subject to the type of constraint (exact/max/main).
+* `ext::intel::experimental::latency_anchor_id<N>`, where `N` is a signed integer
+  
+   A label that can be associated with the pipes and LSUs functions listed above. This label can then be referenced by the `latency_constraint` properties to define relative latency constraints. Functions with this property will be referred to as "labeled functions".
+
+* `ext::intel::experimental::latency_constraint<A, B, C>`
+  
+    A constraint than can be associated with the pipes and LSUs functions listed above. It provides a latency constraint between this function and a different labeled function. Functions which have this property will be referred to as "constrained functions". This constraint has  the following parameters:
+
+   * `A` is a signed integer: The label of the labeled function which is constrained relative to the constrained function.
+   * `B` is an enum value: The type of constraint, can be `latency_control_type::exact` (exact latency), `latency_control_type::max` (maximum latency), and `latency_control_type::min` (minimum latency).
+   * `C` is a signed integer: The relative clock cycle difference between the labeled function and the constrained function, that the constraint should infer subject to the type of constraint (exact/max/main).
 
 ### Simple Code Example
-This first example shows how to use latency controls on pipes. It also uses a function acting as both labeled function and constrained function:
+The following example shows you how to use latency controls on pipes. The example also uses a function acting as both labeled function and constrained function:
 ```cpp
 using namespace sycl;
 using Pipe1 = ext::intel::experimental::pipe<class PipeClass1, int, 8>;
@@ -59,7 +66,7 @@ Pipe3::write(
                    1, ext::intel::experimental::latency_control_type::min, 2>));
 ```
 
-This second example shows how to use latency controls on LSUs. It also uses a negative relative cycle number in `latency_constraint`, which means the constrained function is scheduled **before** the associated labeled function:
+This next example shows you how to use latency controls on LSUs. It also uses a negative relative cycle number in `latency_constraint`, which means that the constrained function is scheduled **before** the associated labeled function:
 ```cpp
 using namespace sycl;
 using BurstCoalescedLSU = sycl::ext::intel::experimental::lsu<
@@ -88,13 +95,13 @@ BurstCoalescedLSU::store(output_ptr, value,
   * Both are in the same block but not in any cluster
   * Both are in the same cluster
 
-**Note**: Clusters can be identified in the System Viewer (Views > System Viewer) of the `report.html` report.
+**Note**: Clusters can be identified in the System Viewer (**Views > System Viewer**) of the `report.html` report.
 
-The compiler strives to achieve the latency constraints, and it errors out if some constraints cannot be satisfied. For example, if one constraint specifies function A should be scheduled after function B, while another constraint specifies function B should be scheduled after function A, then that set of constraints is unsatisfiable.
+The compiler tries to achieve the latency constraints, and it errors out if some constraints cannot be satisfied. For example, if one constraint specifies function A should be scheduled after function B, while another constraint specifies function B should be scheduled after function A, then that set of constraints is unsatisfiable.
 
 ## Key Concepts
-* How to set latency constraints to pipes and LSUs accesses
-* How to confirm that the compiler respected the latency control directive
+ * How to set latency constraints to pipes and LSUs accesses
+ * How to confirm that the compiler respected the latency control directive
 
 ## License
 Code samples are licensed under the MIT license. See
@@ -105,23 +112,23 @@ Third party program Licenses can be found here: [third-party-programs.txt](https
 ## Building the `latency_control` Tutorial
 > **Note**: If you have not already done so, set up your CLI
 > environment by sourcing  the `setvars` script located in
-> the root of your oneAPI installation.
+> the root of your oneAPI installation as follows:
 >
-> Linux Sudo: . /opt/intel/oneapi/setvars.sh
+> Linux Sudo: `. /opt/intel/oneapi/setvars.sh`
 >
-> Linux User: . ~/intel/oneapi/setvars.sh
+> Linux User: `. ~/intel/oneapi/setvars.sh`
 >
-> Windows: C:\Program Files(x86)\Intel\oneAPI\setvars.bat
+> Windows: `C:\Program Files(x86)\Intel\oneAPI\setvars.bat`
 >
->For more information on environment variables, see Use the setvars Script for [Linux or macOS](https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-linux-or-macos.html), or [Windows](https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-windows.html).
+>For more information on environment variables, see [*Use the `setvars` Script for Linux or macOS*](https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-linux-or-macos.html) or [*Use the `setvars` Script for Windows*](https://www.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/oneapi-development-environment-setup/use-the-setvars-script-with-windows.html).
 
 ### Include Files
 The included header `dpc_common.hpp` is located at `%ONEAPI_ROOT%\dev-utilities\latest\include` on your development system.
 
 ### Running Samples in DevCloud
-If running a sample in the Intel DevCloud, remember that you must specify the type of compute node and whether to run in batch or interactive mode. Compiles to FPGA are only supported on fpga_compile nodes. Executing programs on FPGA hardware is only supported on fpga_runtime nodes of the appropriate type, such as fpga_runtime:arria10 or fpga_runtime:stratix10.  Neither compiling nor executing programs on FPGA hardware are supported on the login nodes. For more information, see the Intel® oneAPI Base Toolkit Get Started Guide ([https://devcloud.intel.com/oneapi/documentation/base-toolkit/](https://devcloud.intel.com/oneapi/documentation/base-toolkit/)).
+If running a sample in the Intel DevCloud, remember that you must specify the type of compute node and whether to run in batch or interactive mode. Compiles to FPGA are supported only on `fpga_compile` nodes. Executing programs on FPGA hardware is only supported on `fpga_runtime` nodes of the appropriate type, such as `fpga_runtime:arria10` or `fpga_runtime:stratix10`.  Neither compiling nor executing programs on FPGA hardware are supported on the login nodes. For more information, see the *Intel® oneAPI Base Toolkit Get Started Guide* ([https://devcloud.intel.com/oneapi/documentation/base-toolkit/](https://devcloud.intel.com/oneapi/documentation/base-toolkit/)).
 
-When compiling for FPGA hardware, it is recommended to increase the job timeout to 12h.
+When compiling for FPGA hardware, increase the job timeout to 12h.
 
 ### Using Visual Studio Code*  (Optional)
 
@@ -135,9 +142,9 @@ The basic steps to build and run a sample using VS Code include:
  - Run the sample in the VS Code terminal using the instructions below.
 
 To learn more about the extensions and how to configure the oneAPI environment, see
-[Using Visual Studio Code with Intel® oneAPI Toolkits](https://software.intel.com/content/www/us/en/develop/documentation/using-vs-code-with-intel-oneapi/top.html).
+[*Using Visual Studio Code with Intel® oneAPI Toolkits*](https://software.intel.com/content/www/us/en/develop/documentation/using-vs-code-with-intel-oneapi/top.html).
 
-After learning how to use the extensions for Intel oneAPI Toolkits, return to this readme for instructions on how to build and run a sample.
+After learning how to use the extensions for Intel oneAPI Toolkits, return to this README for instructions on how to build and run a sample.
 
 ### On a Linux* System
 
@@ -215,29 +222,31 @@ After learning how to use the extensions for Intel oneAPI Toolkits, return to th
 *Note:* The Intel® PAC with Intel Arria® 10 GX FPGA and Intel® FPGA PAC D5005
 (with Intel Stratix® 10 SX) do not support Windows*. Compiling to FPGA hardware
 on Windows* requires a third-party or custom Board Support Package (BSP) with
-Windows* support.<br> *Note:* If you encounter any issues with long paths when
+Windows* support.
+
+ *Tip:* If you encounter any issues with long paths when
 compiling under Windows*, you may have to create your ‘build’ directory in a
 shorter path, for example c:\samples\build. You can then run cmake from that
 directory, and provide cmake with the full path to your sample directory.
 
 ### Troubleshooting
-If an error occurs, you can get more details by running `make` with
+If an error occurs, get more details by running `make` with
 the `VERBOSE=1` argument:
 ``make VERBOSE=1``
 For more comprehensive troubleshooting, use the Diagnostics Utility for
-Intel® oneAPI Toolkits, which provides system checks to find missing
+Intel® oneAPI Toolkits that provides system checks to find missing
 dependencies and permissions errors.
 [Learn more](https://software.intel.com/content/www/us/en/develop/documentation/diagnostic-utility-user-guide/top.html).
 
  ### In Third-Party Integrated Development Environments (IDEs)
 
-You can compile and run this tutorial in the Eclipse* IDE (in Linux*) and the Visual Studio* IDE (in Windows*). For instructions, refer to the following link: [Intel® oneAPI DPC++ FPGA Workflows on Third-Party IDEs](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-oneapi-dpcpp-fpga-workflow-on-ide.html)
+You can compile and run this tutorial in the Eclipse* IDE (in Linux*) and the Visual Studio* IDE (in Windows*). For instructions, refer to the following link: [*Intel® oneAPI DPC++ FPGA Workflows on Third-Party IDEs*](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-oneapi-dpcpp-fpga-workflow-on-ide.html)
 
 ## Examining the Reports
 Locate `report.html` in the `latency_control_report.prj/reports/` directory. Open the report in any of Chrome*, Firefox*, Edge*, or Internet Explorer*.
 
-1. Navigate to Schedule Viewer (Views > Schedule Viewer). In this view, you can find the load and the store that have latency constraint and then you can check the scheduled latency between them. The scheduled latency should reflect the applied latency control in the design source code. You can also verify the latency control parameters in the Details pane for the load and store nodes.
-2. Navigate to System Viewer (Views > System Viewer). In this view, you can verify the latency control parameters in the Details pane for the load and the store nodes. You can find the load and store nodes in LatencyControl.B1.
+1. Navigate to Schedule Viewer (**Views > Schedule Viewer**). In this view, you can find the load and the store that have latency constraint and then you can check the scheduled latency between them. The scheduled latency should reflect the applied latency control in the design source code. You can also verify the latency control parameters in the **Details** pane for the load and store nodes.
+2. Navigate to System Viewer (**Views > System Viewer**). In this view, you can verify the latency control parameters in the **Details** pane for the load and the store nodes. You can find the load and store nodes in **LatencyControl.B1**.
 
 ## Running the Sample
 
