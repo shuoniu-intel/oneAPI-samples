@@ -96,6 +96,7 @@ void RunKernel(const std::vector<int> &vec_a,
         // Force the compiler to implement the coefficient array in FPGA
         // pipeline registers rather than in on-chip memory.
         [[intel::fpga_register]] int coeff[kSize];
+        #pragma unroll
         for (size_t i = 0; i < kSize; i++) {
           coeff[i] = kCoeff[i];
         }
