@@ -19,7 +19,7 @@ using namespace sycl;
 void Usage() {
   std::cout
       << "USAGE: ./intersection [--A=<size of list A>] [--B=<size of list B>]"
-      << "[--iters=<number of times to run the kernel>] [-h --help]\n";
+      << "[--iters=<number of times to run the kernel>] [-h --help]" << std::endl;
 }
 
 //
@@ -134,7 +134,7 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
             << ((iterations == 1) ? " iteration" : " iterations")
             << " of kernel " << Version
             << " with |A|=" << a.size() 
-            << " and |B|=" << b.size() << "\n";
+            << " and |B|=" << b.size() << std::endl;
   
   bool success = true;
   std::vector<double> kernel_latency(iterations);
@@ -150,7 +150,7 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
     if (golden_n != n) {
       success = false;
       std::cerr << "ERROR: Kernel version " << Version << " output is incorrect"
-                << " (Expected=" << golden_n << ", Result=" << n << ")\n";
+                << " (Expected=" << golden_n << ", Result=" << n << ")" << std::endl;
     }
 
     // get profiling info
@@ -177,7 +177,7 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
     const double avg_throughput = input_size_megabytes / avg_kernel_latency;
 
     std::cout << "Kernel " << Version 
-              << " average throughput: " << avg_throughput << " MB/s\n";
+              << " average throughput: " << avg_throughput << " MB/s" << std::endl;
 #endif
   }
 
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
       } else if (StrStartsWith(arg, "--B=")) {
         b_size = std::stoi(str_after_equals);
       } else {
-        std::cout << "WARNING: ignoring unknown argument '" << arg << "'\n";
+        std::cout << "WARNING: ignoring unknown argument '" << arg << "'" << std::endl;
       }
     }
   }
@@ -217,12 +217,12 @@ int main(int argc, char** argv) {
   // ensure the arrays have more than 3 elements
   if (a_size <= 3) {
     std::cout << "WARNING: array A must have more than 3 "
-                  "elements, increasing its size\n";
+                  "elements, increasing its size" << std::endl;
     a_size = 4;
   }
   if (b_size <= 3) {
     std::cout << "WARNING: array A must have more than 3"
-                  "elements, increasing its size\n";
+                  "elements, increasing its size" << std::endl;
     b_size = 4;
   }
 
@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  std::cout << "Generating input data\n";
+  std::cout << "Generating input data" << std::endl;
 
   // seed the random number generator
   srand(777);
@@ -243,7 +243,7 @@ int main(int argc, char** argv) {
   std::generate(b.begin(), b.end(), [=] { return rand() % a_size; });
   std::sort(b.begin(), b.end());
 
-  std::cout << "Computing golden result\n";
+  std::cout << "Computing golden result" << std::endl;
 
   // compute the golden result
   int golden_n = 0;
@@ -318,20 +318,20 @@ int main(int argc, char** argv) {
 #endif
 
     if (success) {
-      std::cout << "PASSED\n";
+      std::cout << "PASSED" << std::endl;
     } else {
-      std::cout << "FAILED\n";
+      std::cout << "FAILED" << std::endl;
     }
 
   } catch (exception const& e) {
     // Catches exceptions in the host code
-    std::cerr << "Caught a SYCL host exception:\n" << e.what() << "\n";
+    std::cerr << "Caught a SYCL host exception:\n" << e.what() << "" << std::endl;
     // Most likely the runtime couldn't find FPGA hardware!
     if (e.code().value() == CL_DEVICE_NOT_FOUND) {
       std::cerr << "If you are targeting an FPGA, please ensure that your "
-                   "system has a correctly configured FPGA board.\n";
+                   "system has a correctly configured FPGA board." << std::endl;
       std::cerr << "If you are targeting the FPGA emulator, compile with "
-                   "-DFPGA_EMULATOR.\n";
+                   "-DFPGA_EMULATOR." << std::endl;
     }
     std::terminate();
   }
