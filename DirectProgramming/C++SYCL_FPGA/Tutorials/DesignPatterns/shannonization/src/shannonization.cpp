@@ -56,24 +56,29 @@ unsigned int CountSorted(std::vector<unsigned int>& v, int x) {
 template <int Version, int II>
 event SubmitKernels(queue& q, std::vector<unsigned int>& a,
                     std::vector<unsigned int>& b, int& n) {
+std::cout << "Shuo: enter SubmitKernels" << std::endl;
   // static asserts
   static_assert(Version >= 0 && Version <= 3, "Invalid kernel version");
   static_assert(II > 0, "II target must be positive and non-zero");
-
+std::cout << "Shuo: SubmitKernels - 1" << std::endl;
   // the pipes for this Version of the design
   using ProduceAPipe = pipe<ProduceAPipeClass<Version>, unsigned int>;
   using ProduceBPipe = pipe<ProduceBPipeClass<Version>, unsigned int>;
+std::cout << "Shuo: SubmitKernels - 2" << std::endl;
 
   // input sizes
   const int a_size = a.size();
   const int b_size = b.size();
+std::cout << "Shuo: SubmitKernels - 3" << std::endl;
 
   // setup the input buffers
   buffer a_buf(a);
   buffer b_buf(b);
+std::cout << "Shuo: SubmitKernels - 4" << std::endl;
 
   // setup the output buffer
   buffer<int,1> n_buf(&n, 1);
+std::cout << "Shuo: SubmitKernels - 5" << std::endl;
 
   // submit the kernel that produces table A
   q.submit([&](handler& h) {
@@ -85,6 +90,7 @@ event SubmitKernels(queue& q, std::vector<unsigned int>& a,
     });
   });
 
+std::cout << "Shuo: SubmitKernels - 6" << std::endl;
   // submit the kernel that produces table B
   q.submit([&](handler& h) {
     accessor b_accessor(b_buf, h, read_only);
@@ -95,6 +101,7 @@ event SubmitKernels(queue& q, std::vector<unsigned int>& a,
     });
   });
 
+std::cout << "Shuo: SubmitKernels - 7" << std::endl;
   // submit the kernel that performs the intersection
   event e = q.submit([&](handler& h) {
     // output accessor
@@ -110,6 +117,7 @@ event SubmitKernels(queue& q, std::vector<unsigned int>& a,
     });
   });
 
+std::cout << "Shuo: exit SubmitKernels" << std::endl;
   return e;
 }
 
@@ -124,11 +132,11 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
   // For emulation, just do a single iteration.
   // For hardware, perform multiple iterations for a more
   // accurate throughput measurement
-#if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
+// #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
   int iterations = 1;
-#else
-  int iterations = 5;
-#endif
+// #else
+//   int iterations = 5;
+// #endif
 
   std::cout << "Running " << iterations 
             << ((iterations == 1) ? " iteration" : " iterations")
@@ -139,12 +147,16 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
   bool success = true;
   std::vector<double> kernel_latency(iterations);
 
+std::cout << "Shuo: 1" << std::endl;
   // perform multiple iterations of the kernel to get a more accurate
   // throughput measurement
   for (size_t i = 0; i < iterations && success; i++) {
+std::cout << "Shuo: enter loop" << std::endl;
     // run kernel
     int n = 0;
+std::cout << "Shuo: before SubmitKernels" << std::endl;
     event e = SubmitKernels<Version,II>(q, a, b, n);
+std::cout << "Shuo: after SubmitKernels" << std::endl;
 
     // check output
     if (golden_n != n) {
@@ -187,13 +199,13 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
 
 int main(int argc, char** argv) {
   // parse the command line arguments
-#if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
+// #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
   unsigned int a_size = 128;
   unsigned int b_size = 256;
-#else
-  unsigned int a_size = 131072;
-  unsigned int b_size = 262144;
-#endif
+// #else
+//   unsigned int a_size = 131072;
+//   unsigned int b_size = 262144;
+// #endif
   bool need_help = false;
 
   for (int i = 1; i < argc; i++) {
