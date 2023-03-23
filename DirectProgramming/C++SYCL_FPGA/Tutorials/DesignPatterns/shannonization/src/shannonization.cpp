@@ -135,7 +135,7 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
 #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
   int iterations = 1;
 #else
-  int iterations = 2;
+  int iterations = 5;
 #endif
 
   std::cout << "Running " << iterations 
