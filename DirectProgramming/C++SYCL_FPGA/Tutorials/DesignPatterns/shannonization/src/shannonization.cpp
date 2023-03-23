@@ -199,13 +199,13 @@ std::cout << "Shuo: after SubmitKernels" << std::endl;
 
 int main(int argc, char** argv) {
   // parse the command line arguments
-// #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
+#if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
   unsigned int a_size = 128;
   unsigned int b_size = 256;
-// #else
-//   unsigned int a_size = 131072;
-//   unsigned int b_size = 262144;
-// #endif
+#else
+  unsigned int a_size = 2048;
+  unsigned int b_size = 4096;
+#endif
   bool need_help = false;
 
   for (int i = 1; i < argc; i++) {
