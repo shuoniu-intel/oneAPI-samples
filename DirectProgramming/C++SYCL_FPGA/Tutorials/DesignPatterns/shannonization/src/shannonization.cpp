@@ -132,11 +132,11 @@ bool Intersection(queue& q, std::vector<unsigned int>& a,
   // For emulation, just do a single iteration.
   // For hardware, perform multiple iterations for a more
   // accurate throughput measurement
-// #if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
+#if defined(FPGA_EMULATOR) || defined(FPGA_SIMULATOR)
   int iterations = 1;
-// #else
-//   int iterations = 5;
-// #endif
+#else
+  int iterations = 2;
+#endif
 
   std::cout << "Running " << iterations 
             << ((iterations == 1) ? " iteration" : " iterations")
